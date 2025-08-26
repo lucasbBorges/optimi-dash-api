@@ -131,4 +131,93 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
                 ))
                 .toList();
     }
+
+    @Override
+    public List<FaturamentoComparativo> buscarFaturamentoComparativo() {
+        String sql = """
+                    WITH
+                    FATURAMENTO_ANO_ANTERIOR AS (
+                    SELECT
+                      CASE
+                        WHEN DNF.ESTENT IN ('TO', 'PA') THEN 'TO'
+                        ELSE DNF.ESTENT
+                      END AS ESTADO_AGRUPADO,
+                      0 AS TOTAL_ANO_ATUAL,
+                      ROUND(SUM(DNF.VLR),2) AS TOTAL_ANO_ANTERIOR
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT DNF
+                    WHERE DNF.DTFAT BETWEEN\s
+                          TRUNC(ADD_MONTHS(SYSDATE, -12), 'YYYY')
+                      AND ADD_MONTHS(TRUNC(SYSDATE), -12)\s
+                    GROUP BY
+                      CASE
+                        WHEN DNF.ESTENT IN ('TO', 'PA') THEN 'TO'
+                        ELSE DNF.ESTENT
+                      END
+                    ORDER BY 1
+                    ),
+                    
+                    FATURAMENTO_ANO_ATUAL AS (
+                    SELECT
+                      CASE
+                        WHEN DNF.ESTENT IN ('TO', 'PA') THEN 'TO'
+                        ELSE DNF.ESTENT
+                      END AS ESTADO_AGRUPADO,
+                      ROUND(SUM(DNF.VLR),2) AS TOTAL_ANO_ATUAL,
+                      0 AS TOTAL_ANO_ANTERIOR
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT DNF
+                    WHERE DNF.DTFAT BETWEEN\s
+                          TRUNC(SYSDATE, 'YYYY')
+                      AND TRUNC(SYSDATE)\s
+                    GROUP BY
+                      CASE
+                        WHEN DNF.ESTENT IN ('TO', 'PA') THEN 'TO'
+                        ELSE DNF.ESTENT
+                      END
+                    ORDER BY 1
+                    )
+                    , CONSULTA AS(
+                    SELECT *
+                    FROM FATURAMENTO_ANO_ANTERIOR
+                    UNION ALL
+                    SELECT *
+                    FROM FATURAMENTO_ANO_ATUAL
+                    )
+                    
+                    SELECT ESTADO_AGRUPADO, SUM(TOTAL_ANO_ATUAL), SUM(TOTAL_ANO_ANTERIOR)
+                    FROM CONSULTA
+                    GROUP BY ESTADO_AGRUPADO
+                """;
+
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new FaturamentoComparativo(
+                        (String) linha[0],
+                        (BigDecimal) linha[1],
+                        (BigDecimal) linha[2]
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<Meta> buscarMetaAnoCorrente() {
+        String sql = """
+                    SELECT SUPERVISOR, SUM(META)
+                    FROM OPT_METAS
+                    WHERE ANO = EXTRACT(YEAR FROM SYSDATE) AND MES <= EXTRACT(MONTH FROM SYSDATE)
+                    GROUP BY SUPERVISOR
+                """;
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new Meta(
+                        (String) linha[0],
+                        (BigDecimal) linha[1]
+                ))
+                .toList();
+    }
 }

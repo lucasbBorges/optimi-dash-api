@@ -1,9 +1,6 @@
 package com.optimi.painel.domain.service;
 
-import com.optimi.painel.domain.model.main.Faturamento;
-import com.optimi.painel.domain.model.main.FaturamentoFornec;
-import com.optimi.painel.domain.model.main.HistoricoTotal;
-import com.optimi.painel.domain.model.main.Meta;
+import com.optimi.painel.domain.model.main.*;
 import com.optimi.painel.domain.repository.TotalDashRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,5 +26,13 @@ public class FaturamentoMetaGeralService {
 
     public List<FaturamentoFornec> buscarTopFornecs() {
         return totalDashRepository.buscarFaturamentoPorFornecedor();
+    }
+
+    public List<FaturamentoComparativo> buscarFaturamentoComparativo() {
+        return totalDashRepository.buscarFaturamentoComparativo();
+    }
+
+    public List<Meta> buscarMetaAnoCorrente() {
+        return totalDashRepository.buscarMetaAnoCorrente();
     }
 }

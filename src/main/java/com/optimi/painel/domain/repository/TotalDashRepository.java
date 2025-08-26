@@ -9,4 +9,6 @@ public interface TotalDashRepository {
     List<Meta> buscarMetaDoMesPorEstado();
     List<HistoricoTotal> buscarFaturamentoRetrospec();
     List<FaturamentoFornec> buscarFaturamentoPorFornecedor();
+    List<FaturamentoComparativo> buscarFaturamentoComparativo();
+    List<Meta> buscarMetaAnoCorrente();
 }

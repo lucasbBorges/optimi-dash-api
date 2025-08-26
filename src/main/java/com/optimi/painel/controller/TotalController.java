@@ -2,10 +2,9 @@ package com.optimi.painel.controller;
 
 import com.optimi.painel.controller.model.dto.AgregacaoMetaFaturamentoDTO;
 import com.optimi.painel.controller.model.dto.MetaFaturamentoDTO;
-import com.optimi.painel.domain.model.main.Faturamento;
-import com.optimi.painel.domain.model.main.FaturamentoFornec;
-import com.optimi.painel.domain.model.main.HistoricoTotal;
-import com.optimi.painel.domain.model.main.Meta;
+import com.optimi.painel.controller.model.dto.comparativo.AgregacaoMetaFaturamentoComparativoDTO;
+import com.optimi.painel.controller.model.dto.comparativo.MetaFaturamentoComparativoDTO;
+import com.optimi.painel.domain.model.main.*;
 import com.optimi.painel.domain.service.FaturamentoMetaGeralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +50,40 @@ public class TotalController {
                 }
             }
             agregado.setMetaFaturamento(metaFaturamentoDTO);
+            agregados.add(agregado);
+        }
+        return agregados;
+    }
+
+    @GetMapping("/faturamento-comparativo")
+    public List<AgregacaoMetaFaturamentoComparativoDTO> listarFaturamentoComparativo() {
+        List<String> supervisores = new ArrayList<>(Arrays.asList("RS1","SC1","TO"));
+        List<FaturamentoComparativo> faturadoComparativo = faturamentoMetaGeralService.buscarFaturamentoComparativo();
+        List<Meta> metaMesCorrente = faturamentoMetaGeralService.buscarMetaAnoCorrente();
+
+        List<AgregacaoMetaFaturamentoComparativoDTO> agregados = new ArrayList<>();
+
+        for (String supervisor : supervisores) {
+            AgregacaoMetaFaturamentoComparativoDTO agregado = new AgregacaoMetaFaturamentoComparativoDTO();
+            MetaFaturamentoComparativoDTO metaFaturamentoDTO = new MetaFaturamentoComparativoDTO();
+            agregado.setEstado(supervisor);
+
+            for (FaturamentoComparativo faturamento : faturadoComparativo) {
+                if (faturamento.getEstado().equals("RS") || faturamento.getEstado().equals("SC")) {
+                    faturamento.setEstado(faturamento.getEstado().concat("1"));
+                }
+                if (faturamento.getEstado() != null && faturamento.getEstado().equals(supervisor)) {
+                    metaFaturamentoDTO.setFaturamentoAnoAtual(faturamento.getFaturamentoAnoAtual());
+                    metaFaturamentoDTO.setFaturamentoAnoAnterior(faturamento.getFaturamentoAnoAnterior());
+                }
+            }
+
+            for (Meta meta : metaMesCorrente) {
+                if (meta.getEstado() != null && meta.getEstado().equals(supervisor)) {
+                    metaFaturamentoDTO.setMeta(meta.getMeta());
+                }
+            }
+            agregado.setMetaFaturamentoComparativoDTO(metaFaturamentoDTO);
             agregados.add(agregado);
         }
         return agregados;
