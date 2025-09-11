@@ -133,6 +133,28 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
     }
 
     @Override
+    public List<Meta> buscarMetaAnoCorrente() {
+        String sql = """
+                    SELECT SUPERVISOR, SUM(META)
+                    FROM OPT_METAS
+                    WHERE ANO = EXTRACT(YEAR FROM SYSDATE) AND MES <= EXTRACT(MONTH FROM SYSDATE)
+                    GROUP BY SUPERVISOR
+                """;
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new Meta(
+                        (String) linha[0],
+                        (BigDecimal) linha[1]
+                ))
+                .toList();
+    }
+
+    // FATURAMENTO COMPARATIVO
+
+    @Override
     public List<FaturamentoComparativo> buscarFaturamentoComparativo() {
         String sql = """
                     WITH
@@ -201,23 +223,5 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
                 .toList();
     }
 
-    @Override
-    public List<Meta> buscarMetaAnoCorrente() {
-        String sql = """
-                    SELECT SUPERVISOR, SUM(META)
-                    FROM OPT_METAS
-                    WHERE ANO = EXTRACT(YEAR FROM SYSDATE) AND MES <= EXTRACT(MONTH FROM SYSDATE)
-                    GROUP BY SUPERVISOR
-                """;
-        List<Object[]> resultados = manager
-                .createNativeQuery(sql)
-                .getResultList();
 
-        return resultados.stream()
-                .map(linha -> new Meta(
-                        (String) linha[0],
-                        (BigDecimal) linha[1]
-                ))
-                .toList();
-    }
 }
