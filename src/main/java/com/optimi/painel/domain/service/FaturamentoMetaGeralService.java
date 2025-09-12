@@ -24,8 +24,12 @@ public class FaturamentoMetaGeralService {
         return totalDashRepository.buscarFaturamentoRetrospec();
     }
 
-    public List<FaturamentoFornec> buscarTopFornecs() {
-        return totalDashRepository.buscarFaturamentoPorFornecedor();
+    public List<FaturamentoFornec> buscarTopFornecsMensal() {
+        return totalDashRepository.buscarFaturamentoPorFornecedorMensal();
+    }
+
+    public List<FaturamentoFornec> buscarTopFornecsAnual() {
+        return totalDashRepository.buscarFaturamentoPorFornecedorAnual();
     }
 
     public List<FaturamentoComparativo> buscarFaturamentoComparativo() {

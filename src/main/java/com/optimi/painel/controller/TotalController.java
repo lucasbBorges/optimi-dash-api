@@ -94,6 +94,9 @@ public class TotalController {
         return faturamentoMetaGeralService.buscarHistorico();
     }
 
-    @GetMapping("/top-fornec")
-    public List<FaturamentoFornec> topFornecs() { return faturamentoMetaGeralService.buscarTopFornecs(); }
+    @GetMapping("/top-fornec-mensal")
+    public List<FaturamentoFornec> topFornecsMensal() { return faturamentoMetaGeralService.buscarTopFornecsMensal(); }
+
+    @GetMapping("/top-fornec-anual")
+    public List<FaturamentoFornec> topFornecsAnual() { return faturamentoMetaGeralService.buscarTopFornecsAnual(); }
 }

@@ -98,7 +98,7 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
     }
 
     @Override
-    public List<FaturamentoFornec> buscarFaturamentoPorFornecedor() {
+    public List<FaturamentoFornec> buscarFaturamentoPorFornecedorMensal() {
         String sql = """
                     WITH TOP_FORNECS AS (
                     SELECT DNF.CODFORNEC, PCFORNEC.FANTASIA, ROUND(SUM(VLR),2) VLR
@@ -116,6 +116,41 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
                     SELECT 'OUTROS', ROUND(SUM(VLR),2)
                     FROM OPT_NOTASFATURADAS_VIEW_MAT
                     WHERE DTFAT >= SYSDATE - 30
+                          AND CODFORNEC NOT IN (SELECT CODFORNEC FROM TOP_FORNECS)
+                         \s         
+                """;
+
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new FaturamentoFornec(
+                        (String) linha[0],
+                        (BigDecimal) linha[1]
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<FaturamentoFornec> buscarFaturamentoPorFornecedorAnual() {
+        String sql = """
+                    WITH TOP_FORNECS AS (
+                    SELECT DNF.CODFORNEC, PCFORNEC.FANTASIA, ROUND(SUM(VLR),2) VLR
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT DNF
+                         LEFT JOIN PCFORNEC ON DNF.CODFORNEC = PCFORNEC.CODFORNEC
+                    WHERE DNF.DTFAT >= SYSDATE - 365
+                    GROUP BY DNF.CODFORNEC, PCFORNEC.FANTASIA
+                    ORDER BY 3 DESC, 2
+                    FETCH FIRST 5 ROWS ONLY
+                    )
+                    
+                    SELECT FANTASIA, VLR
+                    FROM TOP_FORNECS
+                    UNION ALL
+                    SELECT 'OUTROS', ROUND(SUM(VLR),2)
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT
+                    WHERE DTFAT >= SYSDATE - 365
                           AND CODFORNEC NOT IN (SELECT CODFORNEC FROM TOP_FORNECS)
                          \s         
                 """;
