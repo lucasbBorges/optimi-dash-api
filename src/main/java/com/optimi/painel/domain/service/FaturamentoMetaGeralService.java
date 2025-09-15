@@ -5,6 +5,7 @@ import com.optimi.painel.domain.repository.TotalDashRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -38,5 +39,12 @@ public class FaturamentoMetaGeralService {
 
     public List<Meta> buscarMetaAnoCorrente() {
         return totalDashRepository.buscarMetaAnoCorrente();
+    }
+
+    public List<HistoricoTotal> buscarFaturamentoAnualComparativo(Integer ano) {
+        if (ano == LocalDate.now().getYear()) {
+            return totalDashRepository.buscarFaturamentoAnualComparativoAnoAtual(ano);
+        }
+        return totalDashRepository.buscarFaturamentoAnualComparativo(ano);
     }
 }

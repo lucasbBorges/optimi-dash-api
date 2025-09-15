@@ -258,5 +258,54 @@ public class TotalDashRepositoryImpl implements TotalDashRepository {
                 .toList();
     }
 
+    @Override
+    public List<HistoricoTotal> buscarFaturamentoAnualComparativo(Integer ano) {
+        String sql = """
+                    SELECT EXTRACT(MONTH FROM DTFAT)
+                           , TO_CHAR(DTFAT, 'MON', 'NLS_DATE_LANGUAGE=Portuguese')
+                           , ROUND(SUM(VLR),2)
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT DNF
+                    WHERE EXTRACT(YEAR FROM DTFAT) = :ano
+                    GROUP BY EXTRACT(MONTH FROM DTFAT), TO_CHAR(DTFAT, 'MON', 'NLS_DATE_LANGUAGE=Portuguese')
+                    ORDER BY 1
+                """;
 
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .setParameter("ano", ano)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new HistoricoTotal(
+                        (String) linha[1],
+                        (BigDecimal) linha[2]
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<HistoricoTotal> buscarFaturamentoAnualComparativoAnoAtual(Integer ano) {
+        String sql = """
+                    SELECT EXTRACT(MONTH FROM DTFAT)
+                           , TO_CHAR(DTFAT, 'MON', 'NLS_DATE_LANGUAGE=Portuguese')
+                           , ROUND(SUM(VLR),2)
+                    FROM OPT_NOTASFATURADAS_VIEW_MAT DNF
+                    WHERE EXTRACT(YEAR FROM DTFAT) = :ano
+                          AND EXTRACT(MONTH FROM DTFAT) < EXTRACT(MONTH FROM SYSDATE)
+                    GROUP BY EXTRACT(MONTH FROM DTFAT), TO_CHAR(DTFAT, 'MON', 'NLS_DATE_LANGUAGE=Portuguese')
+                    ORDER BY 1
+                """;
+
+        List<Object[]> resultados = manager
+                .createNativeQuery(sql)
+                .setParameter("ano", ano)
+                .getResultList();
+
+        return resultados.stream()
+                .map(linha -> new HistoricoTotal(
+                        (String) linha[1],
+                        (BigDecimal) linha[2]
+                ))
+                .toList();
+    }
 }

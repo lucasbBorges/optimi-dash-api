@@ -12,5 +12,7 @@ public interface TotalDashRepository {
     List<FaturamentoFornec> buscarFaturamentoPorFornecedorAnual();
     List<FaturamentoComparativo> buscarFaturamentoComparativo();
     List<Meta> buscarMetaAnoCorrente();
+    List<HistoricoTotal> buscarFaturamentoAnualComparativo(Integer ano);
+    List<HistoricoTotal> buscarFaturamentoAnualComparativoAnoAtual(Integer ano);
 
 }
