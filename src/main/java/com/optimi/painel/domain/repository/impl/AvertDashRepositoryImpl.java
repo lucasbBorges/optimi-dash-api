@@ -105,7 +105,7 @@ public class AvertDashRepositoryImpl implements AvertDashRepository {
                     WITH META AS (
                       SELECT PRACA, META
                       FROM OPT_METAS
-                      WHERE CODFORNEC = 11
+                      WHERE CODFORNEC = 2945
                         AND ANO = EXTRACT(YEAR FROM SYSDATE)
                         AND MES = EXTRACT(MONTH FROM SYSDATE)
                         AND META > 0
